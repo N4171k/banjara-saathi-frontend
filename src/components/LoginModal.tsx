@@ -1,22 +1,59 @@
 'use client'
 
 import { useState } from 'react'
+import { useDispatch } from 'react-redux'
 import { X } from 'lucide-react'
 import { FaGoogle } from 'react-icons/fa'
+import { loginUser } from '@/utils/authHelpers'
+import { setUserId } from '@/store/userSlice'
 
 interface LoginModalProps {
   isOpen: boolean
   onClose: () => void
+  onSwitchToSignup: () => void
 }
 
-export default function LoginModal ({ isOpen, onClose }: LoginModalProps) {
+export default function LoginModal ({
+  isOpen,
+  onClose,
+  onSwitchToSignup
+}: LoginModalProps) {
+  const dispatch = useDispatch()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [error, setError] = useState('')
+  const [isLoading, setIsLoading] = useState(false)
 
   if (!isOpen) return null
 
+  const handleLogin = async () => {
+    setIsLoading(true)
+    setError('')
+
+    try {
+      const {
+        success,
+        session,
+        error: loginError
+      } = await loginUser(email, password)
+
+      if (success && session) {
+        dispatch(setUserId(session.userId))
+        onClose()
+        console.log('Login successful. User ID:', session.userId)
+      } else {
+        setError(loginError || 'Something went wrong during login')
+      }
+    } catch (err) {
+      console.error('Unexpected login error:', err)
+      setError('An unexpected error occurred. Please try again.')
+    }
+
+    setIsLoading(false)
+  }
+
   return (
-    <div className='fixed inset-0 z-50 flex items-center justify-center  px-4'>
+    <div className='fixed inset-0 z-50 flex items-center justify-center px-4'>
       <div
         className='
           relative
@@ -35,11 +72,8 @@ export default function LoginModal ({ isOpen, onClose }: LoginModalProps) {
           scale-100
         '
       >
-        {/* Close “X” */}
-        <button
-          onClick={onClose}
-          className='absolute top-4 right-4 text-black hover:text-gray-200'
-        >
+        {/* Close Button */}
+        <button onClick={onClose} className='absolute top-4 right-4 text-black'>
           <X className='w-6 h-6 sm:w-8 sm:h-8' />
         </button>
 
@@ -86,27 +120,34 @@ export default function LoginModal ({ isOpen, onClose }: LoginModalProps) {
           />
         </div>
 
+        {/* Error */}
+        {error && (
+          <p className='text-center text-sm text-red-600 mt-4'>{error}</p>
+        )}
+
         {/* Action Buttons */}
         <div className='mt-6 space-y-4 sm:space-y-6'>
           {/* Email Login */}
           <button
-            onClick={() => {
-              console.log('Logging in with:', email, password)
-              onClose()
-            }}
-            className='
+            onClick={handleLogin}
+            disabled={isLoading}
+            className={`
               w-full flex items-center justify-center
               px-6 py-3 sm:py-4
-              bg-gradient-to-r from-blue-500 to-indigo-600
+              ${
+                isLoading
+                  ? 'bg-gray-400 cursor-not-allowed'
+                  : 'bg-gradient-to-r from-blue-500 to-indigo-600'
+              }
               text-white text-base sm:text-lg
               font-medium rounded-lg
               shadow-md
               hover:scale-105 hover:brightness-110
               active:scale-95
               transition-transform duration-200
-            '
+            `}
           >
-            Login
+            {isLoading ? 'Logging in...' : 'Login'}
           </button>
 
           {/* Google Login */}
@@ -148,6 +189,17 @@ export default function LoginModal ({ isOpen, onClose }: LoginModalProps) {
             Continue Without Login
           </button>
         </div>
+
+        {/* Sign Up Link */}
+        <p className='mt-6 text-center text-sm text-gray-700'>
+          Don’t have an account?{' '}
+          <button
+            onClick={onSwitchToSignup}
+            className='text-indigo-600 hover:underline font-medium'
+          >
+            Sign up
+          </button>
+        </p>
       </div>
     </div>
   )
