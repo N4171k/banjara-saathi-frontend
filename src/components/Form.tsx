@@ -87,6 +87,12 @@ const PlanForm: React.FC<PlanFormProps> = ({
   onSubmit,
   isLoading
 }) => {
+  const groupTypeOptions = getGroupTypeOptions().filter(opt => {
+    if (numberOfPeople === 1) return opt.value === 'Solo'
+    if (numberOfPeople === 2) return opt.value !== 'Solo'
+    return opt.value !== 'Solo' && opt.value !== 'Couple'
+  })
+
   return (
     <form
       onSubmit={onSubmit}
@@ -191,7 +197,11 @@ const PlanForm: React.FC<PlanFormProps> = ({
             <input
               type='date'
               value={startDate}
-              onChange={e => setStartDate(e.target.value)}
+              onChange={e => {
+                const val = e.target.value
+                setStartDate(val)
+                if (val > endDate) setEndDate(val)
+              }}
               className='border p-2 rounded w-full'
               required
             />
@@ -201,7 +211,11 @@ const PlanForm: React.FC<PlanFormProps> = ({
             <input
               type='date'
               value={endDate}
-              onChange={e => setEndDate(e.target.value)}
+              onChange={e => {
+                const val = e.target.value
+                setEndDate(val)
+                if (val < startDate) setStartDate(val)
+              }}
               className='border p-2 rounded w-full'
               required
             />
@@ -212,18 +226,31 @@ const PlanForm: React.FC<PlanFormProps> = ({
               type='number'
               min={1}
               value={numberOfPeople}
-              onChange={e =>
-                setNumberOfPeople(Math.max(1, parseInt(e.target.value)))
-              }
+              onChange={e => {
+                const value = Math.max(1, parseInt(e.target.value))
+                setNumberOfPeople(value)
+
+                const availableOptions = getGroupTypeOptions().filter(opt => {
+                  if (value === 1) return opt.value === 'Solo'
+                  if (value === 2) return opt.value !== 'Solo'
+                  return opt.value !== 'Solo' && opt.value !== 'Couple'
+                })
+
+                if (!availableOptions.find(opt => opt.value === groupType)) {
+                  setGroupType(availableOptions[0].value)
+                }
+              }}
               className='border p-2 rounded w-full'
             />
           </div>
           <div>
             <label className='block text-sm mb-1'>Group Type</label>
             <Select
-              options={getGroupTypeOptions()}
-              value={getGroupTypeOptions().find(o => o.value === groupType)}
-              onChange={opt => setGroupType(opt?.value || 'Solo')}
+              options={groupTypeOptions}
+              value={groupTypeOptions.find(o => o.value === groupType)}
+              onChange={opt =>
+                setGroupType(opt?.value || groupTypeOptions[0].value)
+              }
               isSearchable={false}
             />
           </div>

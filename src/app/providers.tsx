@@ -25,6 +25,7 @@ function AuthInit ({ children }: { children: ReactNode }) {
       if (!userId) {
         try {
           const user = await account.get() // Throws if no session
+          console.log('User:', user)
           dispatch(setUserId(user.$id)) // Save to Redux
           console.log('Auto-login:', user.$id)
         } catch {

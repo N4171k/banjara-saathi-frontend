@@ -70,13 +70,13 @@ export default function PlanPage () {
   }
 
   return (
-    <div className='flex h-screen bg-gradient-to-br from-sky-400 via-rose-100 to-blue-20 px-10'>
+    <div className='flex h-screen bg-gradient-to-br from-sky-400 via-rose-100 to-blue-20'>
       {/* Chatbot / Itinerary section */}
-      <div className='w-1/2 h-full overflow-y-hidden'>
+      <div className='md:w-[65%] w-screen h-full overflow-y-hidden'>
         <ChatInterface
           iterinaryId={String(id)}
           iterinary={iterinary}
-          language={language} // Always has a value now
+          language={language}
           setIterinary={setIterinary}
           setIsLoading={setIsLoading}
           locations={locations}
@@ -84,12 +84,10 @@ export default function PlanPage () {
         />
       </div>
 
-      {/* Map Section */}
-      {locations.length > 0 && (
-        <div className='w-1/2 h-full overflow-y-hidden'>
-          <MapComponent locations={locations} />
-        </div>
-      )}
+      {/* Map Section (Always rendered, dummy map shown if no locations) */}
+      <div className='md:w-[35%] h-full overflow-y-hidden'>
+        <MapComponent locations={locations} />
+      </div>
     </div>
   )
 }

@@ -6,6 +6,7 @@ import { X } from 'lucide-react'
 import { FaGoogle } from 'react-icons/fa'
 import { loginUser } from '@/utils/authHelpers'
 import { setUserId } from '@/store/userSlice'
+import { loginWithGoogle } from '@/utils/authHelpers'
 
 interface LoginModalProps {
   isOpen: boolean
@@ -148,45 +149,6 @@ export default function LoginModal ({
             `}
           >
             {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-
-          {/* Google Login */}
-          <button
-            onClick={() => {
-              console.log('Google login initiated')
-              onClose()
-            }}
-            className='
-              w-full flex items-center justify-center
-              px-6 py-3 sm:py-4
-              bg-white/80 text-gray-900 text-base sm:text-lg
-              font-medium rounded-lg
-              shadow-md
-              hover:bg-white/90
-              transition
-            '
-          >
-            <FaGoogle className='w-5 h-5 sm:w-6 sm:h-6 mr-2 text-red-500' />
-            Continue with Google
-          </button>
-
-          {/* Guest Access */}
-          <button
-            onClick={() => {
-              console.log('Continuing without login')
-              onClose()
-            }}
-            className='
-              w-full
-              px-6 py-3 sm:py-4
-              bg-gray-200 text-gray-800 text-base sm:text-lg
-              font-medium rounded-lg
-              shadow-sm
-              hover:bg-gray-300
-              transition
-            '
-          >
-            Continue Without Login
           </button>
         </div>
 

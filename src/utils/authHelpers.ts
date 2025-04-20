@@ -1,4 +1,6 @@
 import { account } from '@/lib/appwrite'
+import { OAuthProvider } from 'appwrite';
+import { frontendUrl } from '@/env.exports';
 
 // Helper function to create an account
 export const signupUser = async (email: string, password: string) => {
@@ -23,5 +25,19 @@ export const loginUser = async (email: string, password: string) => {
     console.error('Login error:', err);
     return { success: false, error: err.message || 'Invalid credentials' }
 
+  }
+}
+
+console.log('Google login URL:', frontendUrl)
+
+export const loginWithGoogle = async () => {
+  try {
+    // await account.createOAuth2Session(
+    //   OAuthProvider.Google,
+    //   'https://saarthi.naitiktiwari.in/'
+    // )
+    await account.createOAuth2Session(OAuthProvider.Google, frontendUrl)
+  } catch (error) {
+    console.error(error)
   }
 }

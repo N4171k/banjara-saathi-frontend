@@ -275,8 +275,8 @@ export default function ChatInterface ({
 
   return (
     <div className='max-h-screen flex items-center justify-center overflow-hidden'>
-      <div className='w-full max-w-3xl h-[100vh] backdrop-blur-md rounded-2xl shadow-2xl flex flex-col overflow-hidden'>
-        <div className='flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar'>
+      <div className='w-full h-[100vh] backdrop-blur-md rounded-2xl shadow-2xl flex flex-col overflow-hidden'>
+        <div className='flex-grow overflow-y-auto p-6 space-y-4 custom-scrollbar pl-6'>
           {messages.map((msg, index) => (
             <div
               key={index}

@@ -183,3 +183,18 @@ export const markItineraryAsCommunity = async (itineraryId: string) => {
     };
   }
 };
+
+export async function fetchCommunityItineraries() {
+  try {
+    const response = await databases.listDocuments(
+      dbId,       // 🔁 Replace with your actual database ID
+      iterinaryCollectionId,     // 🔁 Replace with your itinerary collection ID
+      [Query.equal('showInCommunity', true)]
+    )
+
+    return response.documents
+  } catch (error) {
+    console.error('Error fetching community itineraries:', error)
+    throw error
+  }
+}

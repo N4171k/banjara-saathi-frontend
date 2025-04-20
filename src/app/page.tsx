@@ -12,6 +12,7 @@ import LoginModal from '@/components/LoginModal'
 import SignUpModal from '@/components/SignUpModal'
 import { fetchUserTrips } from '@/utils/dbHelpers'
 import { Models } from 'appwrite'
+import { fetchCommunityItineraries } from '@/utils/dbHelpers'
 
 export default function HomePage () {
   const router = useRouter()
@@ -21,6 +22,7 @@ export default function HomePage () {
   const [isLoginOpen, setIsLoginOpen] = useState(false)
   const [isSignUpOpen, setIsSignUpOpen] = useState(false)
   const [userTrips, setUserTrips] = useState<Models.Document[]>([])
+  const [communityTrips, setCommunityTrips] = useState<Models.Document[]>([])
 
   const handlePlanTrip = () => {
     if (!userId) {
@@ -29,6 +31,19 @@ export default function HomePage () {
       router.push('/plan')
     }
   }
+
+  useEffect(() => {
+    const loadCommunityTrips = async () => {
+      try {
+        const trips = await fetchCommunityItineraries()
+        setCommunityTrips(trips)
+      } catch (err) {
+        console.error('Failed to load community trips:', err)
+      }
+    }
+
+    loadCommunityTrips()
+  }, [])
 
   const switchToSignUp = () => {
     setIsLoginOpen(false)
@@ -127,8 +142,8 @@ export default function HomePage () {
                   {trip.departureCity} ➜ {trip.destinationCity}
                 </h4>
                 <p className='text-sm text-gray-600 mb-2'>
-                  {trip.date
-                    ? new Date(trip.date).toLocaleDateString()
+                  {trip.startDate
+                    ? new Date(trip.startDate).toLocaleDateString()
                     : 'Date not set'}
                 </p>
                 <div className='flex items-center text-sm text-gray-500 mb-4'>
@@ -161,6 +176,35 @@ export default function HomePage () {
             onSwitchToLogin={switchToLogin}
           />
         </>
+      )}
+
+      {communityTrips.length > 0 && (
+        <div className='w-full max-w-6xl mt-12'>
+          <h3 className='text-2xl font-semibold text-gray-800 mb-4'>
+            Community Trips
+          </h3>
+          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6'>
+            {communityTrips.map(trip => (
+              <div
+                key={trip.$id}
+                className='flex flex-col justify-between p-5 bg-white shadow-xl rounded-2xl border hover:shadow-2xl hover:scale-[1.02] transition-transform cursor-pointer'
+              >
+                <h4 className='text-lg font-semibold text-pink-700 mb-1'>
+                  {trip.departureCity} ➜ {trip.destinationCity}
+                </h4>
+                <p className='text-sm text-gray-600 mb-2'>
+                  {trip.startDate
+                    ? new Date(trip.startDate).toLocaleDateString()
+                    : 'Date not set'}
+                </p>
+                <div className='flex items-center text-sm text-gray-500 mb-4'>
+                  <MapPin className='w-4 h-4 mr-1' />
+                  {trip.departureCity || 'Unknown'}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </main>
   )

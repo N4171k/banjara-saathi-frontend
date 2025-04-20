@@ -71,35 +71,51 @@ const MapComponent: React.FC<MapComponentProps> = ({ locations }) => {
       const firstLocation = validLocations[0]
       setMapCenter([firstLocation.lat, firstLocation.long])
       setZoom(validLocations.length === 1 ? 10 : 5)
+    } else {
+      setMapCenter([20.5937, 78.9629])
+      setZoom(4)
     }
   }, [validLocations])
 
   const toggleMobileMap = () => setMobileMapVisible(!mobileMapVisible)
   const closeMobileMap = () => setMobileMapVisible(false)
 
+  const renderMap = (isMobile = false) => (
+    <MapContainer
+      center={mapCenter}
+      zoom={zoom}
+      style={{
+        height: isMobile ? 'calc(100% - 40px)' : '100vh',
+        width: '100%'
+      }}
+    >
+      <TileLayer
+        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
+      />
+      {validLocations.length > 0 ? (
+        <>
+          {validLocations.map((location, index) => (
+            <Marker key={index} position={[location.lat, location.long]}>
+              <Tooltip direction='top'>{location.name}</Tooltip>
+              <Popup>{location.name}</Popup>
+            </Marker>
+          ))}
+          <FitBounds locations={validLocations} />
+        </>
+      ) : (
+        <div className='leaflet-bottom leaflet-left m-4 p-2 bg-white rounded shadow text-sm z-[1000]'>
+          No locations to display.
+        </div>
+      )}
+    </MapContainer>
+  )
+
   return (
     <>
       {/* Desktop Layout */}
       <div className='hidden md:flex h-full w-full mx-auto'>
-        <div className='flex-1 pl-5'>
-          <MapContainer
-            center={mapCenter}
-            zoom={zoom}
-            style={{ height: 'calc(100% - 40px)', width: '100%' }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            />
-            {validLocations.map((location, index) => (
-              <Marker key={index} position={[location.lat, location.long]}>
-                <Tooltip direction='top'>{location.name}</Tooltip>
-                <Popup>{location.name}</Popup>
-              </Marker>
-            ))}
-            <FitBounds locations={validLocations} />
-          </MapContainer>
-        </div>
+        <div className='flex-1 w-full h-full'>{renderMap()}</div>
       </div>
 
       {/* Mobile Map Toggle Button */}
@@ -128,23 +144,7 @@ const MapComponent: React.FC<MapComponentProps> = ({ locations }) => {
               ×
             </button>
           </div>
-          <MapContainer
-            center={mapCenter}
-            zoom={zoom}
-            style={{ height: 'calc(100% - 40px)', width: '100%' }}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url='https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'
-            />
-            {validLocations.map((location, index) => (
-              <Marker key={index} position={[location.lat, location.long]}>
-                <Tooltip direction='top'>{location.name}</Tooltip>
-                <Popup>{location.name}</Popup>
-              </Marker>
-            ))}
-            <FitBounds locations={validLocations} />
-          </MapContainer>
+          {renderMap(true)}
         </div>
       </div>
     </>
