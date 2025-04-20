@@ -5,7 +5,10 @@ import { useParams, useRouter } from 'next/navigation'
 import { useSelector } from 'react-redux'
 import { RootState } from '@/store/store'
 import { loadItineraryById } from '@/utils/dbHelpers'
-import MarkDownRenderer from '@/components/MarkdownRenderer'
+import ChatInterface from '@/components/chat'
+import axios from 'axios'
+import { backendUrl } from '@/env.exports'
+import MapComponent from '@/components/MapComponent'
 
 export default function PlanPage () {
   const { id } = useParams()
@@ -14,8 +17,8 @@ export default function PlanPage () {
 
   const [isLoading, setIsLoading] = useState(true)
   const [iterinary, setIterinary] = useState<any>(null)
-  const [messages, setMessages] = useState<any>(null)
-  const [language, setLanguage] = useState(null)
+  const [language, setLanguage] = useState<'English' | 'Hindi'>('English') // Default value set to 'English'
+  const [locations, setLocations] = useState<any[]>([])
 
   useEffect(() => {
     const fetchPlan = async () => {
@@ -23,13 +26,13 @@ export default function PlanPage () {
 
       try {
         const response: any = await loadItineraryById(id)
-        if (!response) {
-          router.push('/') // or show error
+        if (!response || response.data.userId !== userId) {
+          router.push('/')
           return
         }
 
         setIterinary(response.data.iterinary)
-        setLanguage(response.data.language)
+        setLanguage(response.data.language || 'English') // Fallback to 'English' if null or undefined
       } catch (error) {
         console.error('Error fetching itinerary:', error)
       } finally {
@@ -37,17 +40,56 @@ export default function PlanPage () {
       }
     }
 
-    fetchPlan()
+    if (userId) {
+      fetchPlan()
+    }
   }, [id, userId])
+
+  useEffect(() => {
+    if (iterinary) {
+      fetchLocations(iterinary)
+    }
+  }, [iterinary])
+
+  async function fetchLocations (message: any) {
+    try {
+      const response = await axios.post(backendUrl + '/api/locations', {
+        message: message
+      })
+      console.log('Response:', response.data)
+      if (response.data && response.data.data) {
+        setLocations(response.data?.data)
+      }
+    } catch (error) {
+      console.error('Error fetching locations:', error)
+    }
+  }
 
   if (isLoading) {
     return <div className='text-center mt-10'>Loading itinerary...</div>
   }
 
   return (
-    <div>
-    <p>Hello</p>
-      <MarkDownRenderer message={iterinary} />
+    <div className='flex h-screen bg-gradient-to-br from-sky-400 via-rose-100 to-blue-20 px-10'>
+      {/* Chatbot / Itinerary section */}
+      <div className='w-1/2 h-full overflow-y-hidden'>
+        <ChatInterface
+          iterinaryId={String(id)}
+          iterinary={iterinary}
+          language={language} // Always has a value now
+          setIterinary={setIterinary}
+          setIsLoading={setIsLoading}
+          locations={locations}
+          fetchLocations={fetchLocations}
+        />
+      </div>
+
+      {/* Map Section */}
+      {locations.length > 0 && (
+        <div className='w-1/2 h-full overflow-y-hidden'>
+          <MapComponent locations={locations} />
+        </div>
+      )}
     </div>
   )
 }

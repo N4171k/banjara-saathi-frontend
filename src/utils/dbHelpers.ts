@@ -3,7 +3,7 @@ import { ID, Query, Models } from 'appwrite'
 
 const dbId = '680320050000d4776182'
 const iterinaryCollectionId = 'itirenaryCollection'
-const messageCollectionId = '67af17bd002ffe97bdd5'
+const messageCollectionId = 'messageCollection'
 
 interface UserData {
   $id: string
@@ -161,3 +161,25 @@ export const loadItineraryById = async (itineraryId: string) => {
     }
   }
 }
+
+export const markItineraryAsCommunity = async (itineraryId: string) => {
+  try {
+    const updatedDocument = await databases.updateDocument(
+      dbId, // Your database ID
+      iterinaryCollectionId, // Your collection ID
+      itineraryId,
+      { showInCommunity: true }
+    );
+
+    return {
+      success: true,
+      data: updatedDocument
+    };
+  } catch (error: any) {
+    console.error('Error updating itinerary:', error);
+    return {
+      success: false,
+      error: error.message || 'Failed to update itinerary'
+    };
+  }
+};
