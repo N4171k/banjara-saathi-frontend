@@ -22,6 +22,7 @@ type Message = {
   content: string
   iterinaryId: string
 }
+const [isMapVisible, setMapVisible] = useState(true);
 
 type Props = {
   iterinaryId: string
@@ -64,6 +65,13 @@ export default function ChatInterface ({
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages])
+type EditorProps = {
+  iterinary: any;
+  setEditorOpen: Dispatch<SetStateAction<boolean>>;
+  setIterinary: (iterinary: any) => void;
+  saveEditedIterinary: (editedIterinary: string) => Promise<void>;
+  setMapVisible?: (visible: boolean) => void; // optional
+};
 
   useEffect(() => {
     async function loadMessagesForTrip () {
